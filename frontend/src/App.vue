@@ -1,85 +1,86 @@
 <script setup lang="ts">
-	import { inject, onMounted, ref } from 'vue';
-	import AccountGateway from './infra/gateway/AccountGateway';
-	import SignupComponentDomain from './domain/SignupComponentDomain';
+import { inject, onMounted, ref } from 'vue';
+import SignupComponentDomain from "./domain/SignupComponentDomain";
+import type AccountGateway from "./infra/gateway/AccountGateway"
 
-	const signupForm = ref(new SignupComponentDomain());
-	const accountId = ref("");
+const signupForm = ref(new SignupComponentDomain())
+const accountId = ref("")
+let accountGateway: AccountGateway
 
-	let accountGateway: AccountGateway;
+signupForm.value.register(async function (event: any) {
+  if(event.name === "submitted") {
+  const input = event.value
+  const output = await accountGateway.signup(input)
+  accountId.value = output.accountId
+}
+})
 
-	signupForm.value.register(async function (event: any) {
-		if (event.name === "submitted") {
-			const input = event.data;
-			const output = await accountGateway.signup(input);
-			accountId.value = output.accountId;
-		}
-	});
-
-	onMounted(() => {
-		accountGateway = inject("accountGateway") as AccountGateway;
-	});
+onMounted(() => {
+  accountGateway = inject("accountGateway") as AccountGateway
+})
 </script>
 
 <template>
-	<div id="step">Step {{ signupForm.step }}</div>
-	<br/>
-	<div v-if="signupForm.step === 1">
-		<div>
-			<label>
-				<input id="is-passenger" type="checkbox" v-model="signupForm.isPassenger">
-				Passenger
-			</label>
-		</div>
-		<div>
-			<label>
-				<input id="is-driver" type="checkbox" v-model="signupForm.isDriver">
-				Driver
-			</label>
-		</div>
-	</div>
+  <div id="step">Step {{ signupForm.step }}</div>
+  <div v-if="signupForm.step === 1">
+    <div>
+      <label>
+        <input type="checkbox" id="is-passenger" v-model="signupForm.isPassenger">
+        Passenger
+      </label>
+    </div>
+    <div>
+      <label>
+        <input type="checkbox" id="is-driver" v-model="signupForm.isDriver">
+        Driver
+      </label>
+    </div>
+  </div>
 
-	<div v-if="signupForm.step === 2">
-		<div>
-			<label>Name:</label>
-			<div>
-				<input id="input-name" type="text" v-model="signupForm.name">
-			</div>
-		</div>
-		<div>
-			<label>Email:</label>
-			<div>
-				<input id="input-email" type="text" v-model="signupForm.email">
-			</div>
-		</div>
-		<div>
-			<label @click="signupForm.setData()">Cpf:</label>
-			<div>
-				<input id="input-cpf" type="text" v-model="signupForm.cpf">
-			</div>
-		</div>
-		<div v-if="signupForm.isDriver">
-			<label>Car Plate:</label>
-			<div>
-				<input id="input-car-plate" type="text" v-model="signupForm.carPlate">
-			</div>
-		</div>
-	</div>
-	<div v-if="signupForm.step === 3">
-		<div id="name">Name: {{ signupForm.name }}</div>
-		<div id="email">Email: {{ signupForm.email }}</div>
-		<div id="cpf">Cpf: {{ signupForm.cpf }}</div>
-		<div v-if="signupForm.isDriver" id="car-plate">Car Plate: {{ signupForm.carPlate }}</div>
-	</div>
-	<div v-if="signupForm.step === 4">
-		<div v-if="accountId" id="account-id">{{ accountId }}</div>
-	</div>
-	<br/>
-	<button v-if="signupForm.isPreviousButtonVisible()" id="previous-button" @click="signupForm.previous()">Previous</button>
-	<button v-if="signupForm.isNextButtonVisible()" id="next-button" @click="signupForm.next()">Next</button>
-	<button v-if="signupForm.isSubmitButtonVisible()" id="submit-button" @click="signupForm.submit()">Submit</button>
-	<div id="error">{{ signupForm.error }}</div>
+  <div v-if="signupForm.step === 2">
+    <div>
+      <div>
+        <label>Name:</label>
+        <input type="text" id="input-name" v-model="signupForm.name">
+      </div>
+    </div>
+    <div>
+      <div>
+        <label>E-mail:</label>
+        <input type="email" id="input-email" v-model="signupForm.email">
+      </div>
+    </div>
+    <div>
+      <div>
+        <label>Cpf:</label>
+        <input type="text" id="input-cpf" v-model="signupForm.cpf">
+      </div>
+    </div>
+    <div>
+      <div>
+        <label>Car plate:</label>
+        <input type="text" id="input-car-plate" v-if="signupForm.isDriver" v-model="signupForm.carPlate">
+      </div>
+    </div>
+  </div>
+
+  <div v-if="signupForm.step === 3">
+    <div id="name">Name: {{ signupForm.name }}</div>
+    <div id="email">E-mail: {{ signupForm.email }}</div>
+    <div id="cpf">Cpf: {{ signupForm.cpf }}</div>
+    <div v-if="signupForm.isDriver" id="car-plate">Car plate: {{ signupForm.carPlate }}</div>
+  </div>
+
+  <div v-if="signupForm.step === 4">
+    <div id="account-id" v-if="accountId">{{ accountId }}</div>
+  </div>
+  <br>
+
+  <button id="previous-button" v-if="signupForm.isPreviousButtonVisible()"
+    @click="signupForm.previous()">Previous</button>
+  <button id="next-button" v-if="signupForm.isNextButtonVisible()" @click="signupForm.next()">Next</button>
+  <button id="submit-button" v-if="signupForm.isSubmitButtonVisible()" @click="signupForm.submit()">Submit</button>
+  <div id="error">{{ signupForm.error }}</div>
 </template>
 
-<style>
-</style>
+<style scoped></style>

@@ -10,12 +10,13 @@ import RideRepositoryDatabase from "./infra/repository/RideRepositoryDatabase";
 import AccountGatewayHttp from "./infra/gateway/AccountGatewayHttp";
 import RequestRide from "./application/usecase/RequestRide";
 import UpdateRideProjectionApiComposition from "./application/usecase/UpdateRideProjectionApiComposition";
+import AxiosAdapter from "./infra/http/AxiosAdapter";
 
 const httpServer = new ExpressAdapter()
 const database = new PgPromiseAdapter()
 const logger = new LoggerConsole()
 const rideRepository = new RideRepositoryDatabase()
-const accountGateway = new AccountGatewayHttp()
+const accountGateway = new AccountGatewayHttp(new AxiosAdapter())
 const queue = new Queue()
 const sendReceipt = new SendReceipt()
 const requestRide = new RequestRide(rideRepository, accountGateway, logger)
